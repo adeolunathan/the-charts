@@ -7,9 +7,10 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "cd apps/web && npm run dev",
-    "build": "cd apps/web && npm run build",
-    "test": "jest"
+    "dev": "yarn workspace @charts/web dev",
+    "build": "yarn workspaces run build",
+    "build:core": "yarn workspace @charts/core build",
+    "test": "yarn workspaces run test"
   },
   "devDependencies": {
     "jest": "^29.5.0",

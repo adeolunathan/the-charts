@@ -171,6 +171,38 @@ export const DEFAULT_THEME: Theme = {
  * @returns A new theme with custom options applied
  */
 export function createTheme(options: Partial<Theme>): Theme {
+  // Handle nested objects with defaults for missing properties
+  const mergedCharts = options.charts || {};
+
+  // Set default values for line, bar, and pie if they're not provided
+  if (mergedCharts.line) {
+    mergedCharts.line = {
+      lineWidth: DEFAULT_THEME.charts.line.lineWidth,
+      ...mergedCharts.line,
+      marker: {
+        ...DEFAULT_THEME.charts.line.marker,
+        ...(mergedCharts.line.marker || {})
+      }
+    };
+  }
+
+  if (mergedCharts.bar) {
+    mergedCharts.bar = {
+      cornerRadius: DEFAULT_THEME.charts.bar.cornerRadius,
+      maxWidth: DEFAULT_THEME.charts.bar.maxWidth,
+      ...mergedCharts.bar
+    };
+  }
+
+  if (mergedCharts.pie) {
+    mergedCharts.pie = {
+      innerRadius: DEFAULT_THEME.charts.pie.innerRadius,
+      padAngle: DEFAULT_THEME.charts.pie.padAngle,
+      cornerRadius: DEFAULT_THEME.charts.pie.cornerRadius,
+      ...mergedCharts.pie
+    };
+  }
+
   return {
     ...DEFAULT_THEME,
     ...options,
@@ -188,10 +220,7 @@ export function createTheme(options: Partial<Theme>): Theme {
     },
     charts: {
       ...DEFAULT_THEME.charts,
-      ...options.charts,
-      line: { ...DEFAULT_THEME.charts.line, ...options.charts?.line },
-      bar: { ...DEFAULT_THEME.charts.bar, ...options.charts?.bar },
-      pie: { ...DEFAULT_THEME.charts.pie, ...options.charts?.pie }
+      ...mergedCharts
     }
   };
 }

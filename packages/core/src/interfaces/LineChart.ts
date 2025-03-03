@@ -5,6 +5,76 @@
 import { ChartOptions } from './Chart';
 
 /**
+ * Interface for a single line series configuration
+ */
+export interface LineSeries {
+  /**
+   * Field name for y-values
+   */
+  field: string;
+
+  /**
+   * Display name for the series
+   */
+  name?: string;
+
+  /**
+   * Series color (overrides theme color)
+   */
+  color?: string;
+
+  /**
+   * Line width
+   */
+  lineWidth?: number;
+
+  /**
+   * Line style (solid, dashed, etc.)
+   */
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+
+  /**
+   * Marker configuration
+   */
+  marker?: {
+    /**
+     * Whether to show markers
+     */
+    show: boolean;
+
+    /**
+     * Marker size
+     */
+    size?: number;
+
+    /**
+     * Marker shape
+     */
+    shape?: 'circle' | 'square' | 'triangle' | 'diamond';
+  };
+
+  /**
+   * Area configuration (for area charts)
+   */
+  area?: {
+    /**
+     * Whether to fill the area under the line
+     */
+    show: boolean;
+
+    /**
+     * Fill opacity (0-1)
+     */
+    opacity?: number;
+
+    /**
+     * Fill color (defaults to series color with opacity)
+     */
+    color?: string;
+  };
+}
+
+/**
  * Configuration options specific to line charts
  */
 export interface LineChartOptions extends ChartOptions {
@@ -79,84 +149,9 @@ export interface LineChartOptions extends ChartOptions {
   };
 
   /**
-   * Series configuration
+   * Series configuration - can be a single series or multiple series
    */
-  series: {
-    /**
-     * Field name for y-values
-     */
-    field: string;
-
-    /**
-     * Display name for the series
-     */
-    name?: string;
-
-    /**
-     * Series color (overrides theme color)
-     */
-    color?: string;
-
-    /**
-     * Line width
-     */
-    lineWidth?: number;
-
-    /**
-     * Line style (solid, dashed, etc.)
-     */
-    lineStyle?: 'solid' | 'dashed' | 'dotted';
-
-    /**
-     * Marker configuration
-     */
-    marker?: {
-      /**
-       * Whether to show markers
-       */
-      show: boolean;
-
-      /**
-       * Marker size
-       */
-      size?: number;
-
-      /**
-       * Marker shape
-       */
-      shape?: 'circle' | 'square' | 'triangle' | 'diamond';
-    };
-
-    /**
-     * Area configuration (for area charts)
-     */
-    area?: {
-      /**
-       * Whether to fill the area under the line
-       */
-      show: boolean;
-
-      /**
-       * Fill opacity (0-1)
-       */
-      opacity?: number;
-
-      /**
-       * Fill color (defaults to series color with opacity)
-       */
-      color?: string;
-    };
-  }[] | {
-    /**
-     * Field name for y-values
-     */
-    field: string;
-
-    /**
-     * Display name for the series
-     */
-    name?: string;
-  };
+  series: LineSeries | LineSeries[];
 
   /**
    * Whether to stack multiple series

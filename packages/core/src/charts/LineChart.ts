@@ -40,7 +40,7 @@ export class LineChart extends BaseChart {
   /**
    * Renders the line chart
    */
-  protected async renderChart(): void {
+  protected renderChart(): void {
     if (!this.container) {
       throw new Error('Cannot render chart: no container element');
     }
@@ -61,6 +61,19 @@ export class LineChart extends BaseChart {
       throw new Error('Could not get canvas context');
     }
 
+    // Render the chart asynchronously
+    this.renderChartAsync().catch(error => {
+      console.error('Error rendering chart:', error);
+      if (this.container) {
+        this.container.innerHTML = `<div class="error">Error rendering chart: ${error.message}</div>`;
+      }
+    });
+  }
+
+  /**
+   * Asynchronously renders the chart
+   */
+  private async renderChartAsync(): Promise<void> {
     // Get data
     const data = await this.dataSource.getData();
 
@@ -205,15 +218,24 @@ export class LineChart extends BaseChart {
         maxY = this.lineOptions.yAxis.max;
       }
 
+      if (!this.ctx) return;
+
       // Draw the line
-      this.ctx.strokeStyle = series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
-      this.ctx.lineWidth = series.lineWidth || this.theme.charts.line?.lineWidth || 2;
+      const seriesColor = 'color' in series ? series.color : this.theme.colors[seriesIndex % this.theme.colors.length];
+      this.ctx.strokeStyle = seriesColor;
+
+      const lineWidth = 'lineWidth' in series ? series.lineWidth : this.theme.charts.line?.lineWidth || 2;
+      this.ctx.lineWidth = lineWidth;
 
       // Set line style
-      if (series.lineStyle === 'dashed') {
-        this.ctx.setLineDash([5, 5]);
-      } else if (series.lineStyle === 'dotted') {
-        this.ctx.setLineDash([2, 2]);
+      if ('lineStyle' in series) {
+        if (series.lineStyle === 'dashed') {
+          this.ctx.setLineDash([5, 5]);
+        } else if (series.lineStyle === 'dotted') {
+          this.ctx.setLineDash([2, 2]);
+        } else {
+          this.ctx.setLineDash([]);
+        }
       } else {
         this.ctx.setLineDash([]);
       }
@@ -237,24 +259,26 @@ export class LineChart extends BaseChart {
       this.ctx.stroke();
 
       // Draw markers if enabled
-      if (series.marker?.show) {
+      if ('marker' in series && series.marker?.show) {
         const markerSize = series.marker.size || this.theme.charts.line?.marker.size || 6;
 
         data.forEach((row, i) => {
           const x = padding + (i / (data.length - 1)) * chartWidth;
           const y = this.height - padding - ((Number(row[yField]) - minY) / (maxY - minY)) * chartHeight;
 
-          this.ctx!.fillStyle = series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
-          this.ctx!.beginPath();
-          this.ctx!.arc(x, y, markerSize / 2, 0, Math.PI * 2);
-          this.ctx!.fill();
+          if (this.ctx) {
+            this.ctx.fillStyle = seriesColor;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, markerSize / 2, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
         });
       }
 
       // Fill area if enabled
-      if (series.area?.show) {
+      if ('area' in series && series.area?.show && this.ctx) {
         this.ctx.globalAlpha = series.area.opacity || 0.2;
-        this.ctx.fillStyle = series.area.color || series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
+        this.ctx.fillStyle = series.area.color || seriesColor;
 
         this.ctx.beginPath();
 
@@ -303,7 +327,8 @@ export class LineChart extends BaseChart {
       const y = legendY;
 
       // Draw color marker
-      this.ctx!.fillStyle = series.color || this.theme.colors[index % this.theme.colors.length];
+      const seriesColor = 'color' in series ? series.color : this.theme.colors[index % this.theme.colors.length];
+      this.ctx!.fillStyle = seriesColor;
       this.ctx!.fillRect(x, y, 15, 15);
 
       // Draw series name
