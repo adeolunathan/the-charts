@@ -2,21 +2,19 @@
   "name": "@charts/web",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@charts/core": "0.1.0",
-    "@charts/data-processing": "0.1.0",
-    "@charts/themes": "0.1.0",
-    "@charts/ui": "0.1.0",
-    "@charts/api": "0.1.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
+  "description": "BizCharts - Web application for chart visualization",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@charts/core": "^0.1.0",
+    "@charts/data-processing": "^0.1.0",
+    "@charts/themes": "^0.1.0",
+    "@charts/ui": "^0.1.0"
   },
   "devDependencies": {
-    "vite": "^4.3.5"
+    "vite": "^4.3.9"
   }
 }

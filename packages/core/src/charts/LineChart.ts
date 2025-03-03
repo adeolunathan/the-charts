@@ -15,20 +15,20 @@ export class LineChart extends BaseChart {
    * Options specific to line charts
    */
   protected lineOptions: LineChartOptions;
-  
+
   /**
    * Canvas element for rendering
    */
   private canvas: HTMLCanvasElement | null = null;
-  
+
   /**
    * Canvas 2D context
    */
   private ctx: CanvasRenderingContext2D | null = null;
-  
+
   /**
    * Creates a new line chart
-   * 
+   *
    * @param dataSource The data source
    * @param options Line chart specific options
    */
@@ -36,7 +36,7 @@ export class LineChart extends BaseChart {
     super(dataSource, options);
     this.lineOptions = options;
   }
-  
+
   /**
    * Renders the line chart
    */
@@ -44,26 +44,26 @@ export class LineChart extends BaseChart {
     if (!this.container) {
       throw new Error('Cannot render chart: no container element');
     }
-    
+
     // Create canvas element
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.width;
     this.canvas.height = this.height;
     this.canvas.style.display = 'block';
-    
+
     // Clear the container and add the canvas
     this.container.innerHTML = '';
     this.container.appendChild(this.canvas);
-    
+
     // Get rendering context
     this.ctx = this.canvas.getContext('2d');
     if (!this.ctx) {
       throw new Error('Could not get canvas context');
     }
-    
+
     // Get data
     const data = await this.dataSource.getData();
-    
+
     // Set up scale and render the chart components
     this.setupScale(data);
     this.drawBackground();
@@ -72,10 +72,10 @@ export class LineChart extends BaseChart {
     this.drawLegend();
     this.drawTitle();
   }
-  
+
   /**
    * Set up the scale for the chart based on the data
-   * 
+   *
    * @param data The data to scale to
    */
   private setupScale(data: DataRow[]): void {
@@ -83,23 +83,23 @@ export class LineChart extends BaseChart {
     // based on the data values and chart dimensions
     // For now, this is a placeholder
   }
-  
+
   /**
    * Draw the chart background
    */
   private drawBackground(): void {
     if (!this.ctx) return;
-    
+
     this.ctx.fillStyle = this.theme.backgroundColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
   }
-  
+
   /**
    * Draw the chart axes
    */
   private drawAxes(): void {
     if (!this.ctx) return;
-    
+
     // Draw X and Y axes
     // This would include:
     // - Axis lines
@@ -107,28 +107,28 @@ export class LineChart extends BaseChart {
     // - Tick marks
     // - Labels
     // - Titles
-    
+
     // For now, let's draw some placeholder axes
     const padding = 50; // Padding from the edges
     const chartWidth = this.width - padding * 2;
     const chartHeight = this.height - padding * 2;
-    
+
     // Draw axes
     this.ctx.strokeStyle = this.theme.xAxis.lineColor;
     this.ctx.lineWidth = this.theme.xAxis.lineWidth;
-    
+
     // X-axis
     this.ctx.beginPath();
     this.ctx.moveTo(padding, this.height - padding);
     this.ctx.lineTo(this.width - padding, this.height - padding);
     this.ctx.stroke();
-    
+
     // Y-axis
     this.ctx.beginPath();
     this.ctx.moveTo(padding, padding);
     this.ctx.lineTo(padding, this.height - padding);
     this.ctx.stroke();
-    
+
     // X-axis title
     if (this.lineOptions.xAxis?.title) {
       this.ctx.font = `${this.theme.xAxis.title.weight} ${this.theme.xAxis.title.size}px ${this.theme.xAxis.title.family}`;
@@ -140,7 +140,7 @@ export class LineChart extends BaseChart {
         this.height - padding / 3
       );
     }
-    
+
     // Y-axis title
     if (this.lineOptions.yAxis?.title) {
       this.ctx.save();
@@ -153,37 +153,37 @@ export class LineChart extends BaseChart {
       this.ctx.restore();
     }
   }
-  
+
   /**
    * Draw the data series
-   * 
+   *
    * @param data The data to draw
    */
   private drawSeries(data: DataRow[]): void {
     if (!this.ctx || data.length === 0) return;
-    
+
     const padding = 50; // Same padding as in drawAxes
     const chartWidth = this.width - padding * 2;
     const chartHeight = this.height - padding * 2;
-    
+
     // Convert series option to array if it's a single object
-    const seriesList = Array.isArray(this.lineOptions.series) 
-      ? this.lineOptions.series 
+    const seriesList = Array.isArray(this.lineOptions.series)
+      ? this.lineOptions.series
       : [this.lineOptions.series];
-    
+
     // Get x-axis field
     const xField = this.lineOptions.xAxis?.field || this.dataSource.fields[0].name;
-    
+
     // Draw each series
     seriesList.forEach((series, seriesIndex) => {
       const yField = series.field;
-      
+
       // Get min/max values for scaling
       let minX = 0;
       let maxX = data.length - 1;
       let minY = Number.MAX_VALUE;
       let maxY = Number.MIN_VALUE;
-      
+
       data.forEach(row => {
         const y = Number(row[yField]);
         if (!isNaN(y)) {
@@ -191,12 +191,12 @@ export class LineChart extends BaseChart {
           maxY = Math.max(maxY, y);
         }
       });
-      
+
       // Add some padding to the y-axis scale
       const yRange = maxY - minY;
       minY = Math.max(0, minY - yRange * 0.1);
       maxY = maxY + yRange * 0.1;
-      
+
       // Override with user-specified min/max if provided
       if (this.lineOptions.yAxis?.min !== undefined) {
         minY = this.lineOptions.yAxis.min;
@@ -204,11 +204,11 @@ export class LineChart extends BaseChart {
       if (this.lineOptions.yAxis?.max !== undefined) {
         maxY = this.lineOptions.yAxis.max;
       }
-      
+
       // Draw the line
       this.ctx.strokeStyle = series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
       this.ctx.lineWidth = series.lineWidth || this.theme.charts.line?.lineWidth || 2;
-      
+
       // Set line style
       if (series.lineStyle === 'dashed') {
         this.ctx.setLineDash([5, 5]);
@@ -217,15 +217,15 @@ export class LineChart extends BaseChart {
       } else {
         this.ctx.setLineDash([]);
       }
-      
+
       this.ctx.beginPath();
-      
+
       // Plot points and connect them
       let firstPoint = true;
       data.forEach((row, i) => {
         const x = padding + (i / (data.length - 1)) * chartWidth;
         const y = this.height - padding - ((Number(row[yField]) - minY) / (maxY - minY)) * chartHeight;
-        
+
         if (firstPoint) {
           this.ctx!.moveTo(x, y);
           firstPoint = false;
@@ -233,41 +233,41 @@ export class LineChart extends BaseChart {
           this.ctx!.lineTo(x, y);
         }
       });
-      
+
       this.ctx.stroke();
-      
+
       // Draw markers if enabled
       if (series.marker?.show) {
         const markerSize = series.marker.size || this.theme.charts.line?.marker.size || 6;
-        
+
         data.forEach((row, i) => {
           const x = padding + (i / (data.length - 1)) * chartWidth;
           const y = this.height - padding - ((Number(row[yField]) - minY) / (maxY - minY)) * chartHeight;
-          
+
           this.ctx!.fillStyle = series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
           this.ctx!.beginPath();
           this.ctx!.arc(x, y, markerSize / 2, 0, Math.PI * 2);
           this.ctx!.fill();
         });
       }
-      
+
       // Fill area if enabled
       if (series.area?.show) {
         this.ctx.globalAlpha = series.area.opacity || 0.2;
         this.ctx.fillStyle = series.area.color || series.color || this.theme.colors[seriesIndex % this.theme.colors.length];
-        
+
         this.ctx.beginPath();
-        
+
         // Starting point at the bottom
         this.ctx.moveTo(padding, this.height - padding);
-        
+
         // Draw the filled area
         data.forEach((row, i) => {
           const x = padding + (i / (data.length - 1)) * chartWidth;
           const y = this.height - padding - ((Number(row[yField]) - minY) / (maxY - minY)) * chartHeight;
           this.ctx!.lineTo(x, y);
         });
-        
+
         // Complete the path back to the bottom
         this.ctx.lineTo(this.width - padding, this.height - padding);
         this.ctx.closePath();
@@ -276,36 +276,36 @@ export class LineChart extends BaseChart {
       }
     });
   }
-  
+
   /**
    * Draw the chart legend
    */
   private drawLegend(): void {
     if (!this.ctx) return;
-    
+
     // Only draw legend if there are multiple series or a name is specified
-    const seriesList = Array.isArray(this.lineOptions.series) 
-      ? this.lineOptions.series 
+    const seriesList = Array.isArray(this.lineOptions.series)
+      ? this.lineOptions.series
       : [this.lineOptions.series];
-      
+
     if (seriesList.length <= 1 && !seriesList[0].name) {
       return;
     }
-    
+
     const padding = 50;
     const legendX = padding;
     const legendY = padding / 2;
     const itemWidth = 100;
     const itemHeight = 20;
-    
+
     seriesList.forEach((series, index) => {
       const x = legendX + index * itemWidth;
       const y = legendY;
-      
+
       // Draw color marker
       this.ctx!.fillStyle = series.color || this.theme.colors[index % this.theme.colors.length];
       this.ctx!.fillRect(x, y, 15, 15);
-      
+
       // Draw series name
       this.ctx!.font = `${this.theme.legend.labels.weight} ${this.theme.legend.labels.size}px ${this.theme.legend.labels.family}`;
       this.ctx!.fillStyle = this.theme.legend.labels.color;
@@ -313,22 +313,22 @@ export class LineChart extends BaseChart {
       this.ctx!.fillText(series.name || series.field, x + 20, y + 12);
     });
   }
-  
+
   /**
    * Draw the chart title
    */
   private drawTitle(): void {
     if (!this.ctx || !this.title) return;
-    
+
     this.ctx.font = `${this.theme.title.weight} ${this.theme.title.size}px ${this.theme.title.family}`;
     this.ctx.fillStyle = this.theme.title.color;
     this.ctx.textAlign = 'center';
     this.ctx.fillText(this.title, this.width / 2, 25);
   }
-  
+
   /**
    * Exports the chart as an image
-   * 
+   *
    * @param format The format to export (png, jpeg, svg, pdf)
    * @param options Additional export options
    * @returns Promise resolving to a Blob containing the exported image
@@ -337,7 +337,7 @@ export class LineChart extends BaseChart {
     if (!this.canvas) {
       throw new Error('Cannot export chart: it has not been rendered yet');
     }
-    
+
     if (format === 'png') {
       return new Promise((resolve, reject) => {
         this.canvas!.toBlob(blob => {
